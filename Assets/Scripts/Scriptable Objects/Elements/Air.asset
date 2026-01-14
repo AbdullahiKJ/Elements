@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17d3e6872d4414e9ca627622c81e86e7, type: 3}
   m_Name: Air
   m_EditorClassIdentifier: Assembly-CSharp::ElementData
-  type: 0
+  type: 3
   intensity: 0
   hitVFX: {fileID: 0}

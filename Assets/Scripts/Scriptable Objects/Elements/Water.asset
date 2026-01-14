@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17d3e6872d4414e9ca627622c81e86e7, type: 3}
-  m_Name: Earth
+  m_Name: Water
   m_EditorClassIdentifier: Assembly-CSharp::ElementData
-  type: 0
+  type: 1
   intensity: 0
   hitVFX: {fileID: 0}
