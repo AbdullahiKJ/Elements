@@ -74,7 +74,7 @@ public class ProjectileSystem : MonoBehaviour
 
     private void SwitchProjectile()
     {
-        if (_input.switchPressed)
+        if (_input.switchValue != 0f)
         {
             if (_input.switchValue > 0f)
             {
@@ -82,15 +82,14 @@ public class ProjectileSystem : MonoBehaviour
             }
             else if (_input.switchValue < 1f)
             {
-                Debug.Log("negative");
                 prefabIndex = (prefabIndex - 1 + projectilePrefabs.Length) % projectilePrefabs.Length;
             }
 
             // Update the UI
             SetUIColor();
 
-            // Reset the pressed flag
-            _input.switchPressed = false;
+            // Reset the switch value
+            _input.switchValue = 0f;
         }
     }
 

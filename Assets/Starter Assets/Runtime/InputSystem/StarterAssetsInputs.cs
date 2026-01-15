@@ -14,7 +14,6 @@ namespace StarterAssets
 		public bool sprint;
 		public bool fire;
 		public float switchValue;
-		public bool switchPressed;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -53,7 +52,7 @@ namespace StarterAssets
 		}
 		public void OnSwitch(InputValue value)
 		{
-			SwitchInput(value.Get<float>(), value.isPressed);
+			SwitchInput(value.Get<float>());
 		}
 #endif
 
@@ -95,10 +94,9 @@ namespace StarterAssets
 		}
 
 		// Change projectile element
-		public void SwitchInput(float newSwitchDirection, bool isPressed)
+		public void SwitchInput(float newSwitchDirection)
 		{
-			switchPressed = isPressed;
-			if (isPressed)
+			if (newSwitchDirection != 0)
 				switchValue = newSwitchDirection;
 		}
 	}

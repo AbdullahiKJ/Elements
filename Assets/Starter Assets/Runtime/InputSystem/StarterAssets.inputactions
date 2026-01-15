@@ -55,7 +55,7 @@
                     "name": "Switch",
                     "type": "Value",
                     "id": "aed1f6b1-28b7-43d6-bcee-17cee8729c2c",
-                    "expectedControlType": "Axis",
+                    "expectedControlType": "Double",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
