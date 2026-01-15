@@ -7,7 +7,7 @@ public class EnvironmentGrid : MonoBehaviour
     public float cellSize = 1f;
 
     public EnvironmentGridCell cellPrefab;
-
+    public EnvironmentalStatusController statusController;
     private EnvironmentGridCell[,] grid;
 
     public void GenerateGrid()
@@ -29,6 +29,9 @@ public class EnvironmentGrid : MonoBehaviour
 
                 // Set the renderer
                 cell.groundRenderer = cell.GetComponent<Renderer>();
+
+                // Set the controller
+                cell.statusController = statusController;
 
                 // Apply visuals
                 cell.ApplyVisuals();

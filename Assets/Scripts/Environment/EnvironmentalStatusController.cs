@@ -5,7 +5,7 @@ public class EnvironmentalStatusController : MonoBehaviour
     public EnvironmentStatusType CurrentStatus { get; private set; }
 
     [SerializeField] ReactionResolver reactionResolver;
-    public void ProcessElement(ElementData element, Vector3 hitPoint, SurfaceType surfaceType, MeshRenderer renderer)
+    public EnvironmentStatusType ProcessElement(ElementData element, Vector3 hitPoint, SurfaceType surfaceType, EnvironmentStatusType currentStatus)
     {
         if (reactionResolver.TryGetReaction(
             element.type,
@@ -13,17 +13,14 @@ public class EnvironmentalStatusController : MonoBehaviour
             surfaceType,
             out ReactionResult result))
         {
-            ApplyStatusEffect(result.newStatus);
             // Additional effects like visual or audio feedback can be triggered here
 
-            // Testing
-            renderer.material = result.reactionMaterial;
+            // Return the new status
+            return result.newStatus;
         }
-    }
 
-    void ApplyStatusEffect(EnvironmentStatusType? newStatus)
-    {
-        if (newStatus.HasValue)
-            CurrentStatus = newStatus.Value;
+        // Return the same status if no reaction is found
+        else
+            return currentStatus;
     }
 }

@@ -8,11 +8,14 @@ public class EnvironmentGridCell : MonoBehaviour, IElementReceiver
 
     [Header("Visuals")]
     public Renderer groundRenderer;
+    public EnvironmentalStatusController statusController;
 
     public void ReceiveElement(ElementData element, Vector3 hitPoint)
     {
         // For now, just debug
         Debug.Log($"Element {element.type} hit cell {gridPosition}");
+        currentStatus = statusController.ProcessElement(element, hitPoint, surfaceType, currentStatus);
+        ApplyVisuals();
     }
 
     public void ApplyVisuals()
@@ -32,10 +35,23 @@ public class EnvironmentGridCell : MonoBehaviour, IElementReceiver
                 break;
         }
 
-        if (currentStatus == EnvironmentStatusType.Burning)
-            baseColor = Color.red;
-        else if (currentStatus == EnvironmentStatusType.Wet)
-            baseColor *= 0.7f;
+        switch (currentStatus)
+        {
+            case EnvironmentStatusType.Burning:
+                baseColor = Color.red;
+                break;
+            case EnvironmentStatusType.Wet:
+                baseColor *= 0.7f;
+                break;
+            case EnvironmentStatusType.Frozen:
+                baseColor = Color.teal;
+                break;
+            case EnvironmentStatusType.Mud:
+                baseColor = Color.brown;
+                break;
+            default:
+                break;
+        }
 
         var tempMaterial = new Material(groundRenderer.sharedMaterial);
         tempMaterial.color = baseColor;
