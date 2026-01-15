@@ -1,8 +1,11 @@
 using UnityEngine;
 
-public class ReactionResult : MonoBehaviour
+[System.Serializable]
+public class ReactionResult
 {
-    public StatusType? removeStatus;
-    public StatusEffectData addStatus;
+    public EnvironmentStatusType newStatus;
     public GameObject reactionVFX;
+    public float duration;
+    [Header("Debug")]
+    public Material reactionMaterial;
 }

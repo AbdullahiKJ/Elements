@@ -21,7 +21,8 @@ public class ReactionResolver : MonoBehaviour
             var key = new ReactionKey
             {
                 element = entry.element,
-                status = entry.existingStatus
+                status = entry.existingStatus,
+                surfaceType = entry.surfaceType
             };
 
             if (!lookup.ContainsKey(key))
@@ -37,13 +38,15 @@ public class ReactionResolver : MonoBehaviour
 
     public bool TryGetReaction(
         ElementType element,
-        StatusType status,
+        EnvironmentStatusType status,
+        SurfaceType surfaceType,
         out ReactionResult result)
     {
         var key = new ReactionKey
         {
             element = element,
-            status = status
+            status = status,
+            surfaceType = surfaceType
         };
 
         return lookup.TryGetValue(key, out result);

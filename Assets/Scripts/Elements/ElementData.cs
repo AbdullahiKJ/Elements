@@ -5,9 +5,6 @@ public enum ElementType
     Fire,
     Water,
     Earth,
-    Air,
-    Steam,
-    Mud,
     Ice,
 }
 

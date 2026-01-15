@@ -1,9 +1,8 @@
-using UnityEngine;
-
 [System.Serializable]
-public class ReactionEntry : MonoBehaviour
+public class ReactionEntry
 {
+    public SurfaceType surfaceType;
+    public EnvironmentStatusType existingStatus;
     public ElementType element;
-    public StatusType existingStatus;
     public ReactionResult result;
 }

@@ -1,10 +1,12 @@
 using StarterAssets;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ProjectileSystem : MonoBehaviour
 {
     Camera mainCamera;
     StarterAssetsInputs _input;
+    [SerializeField] Image elementUI;
 
     [Tooltip("Time required to pass before being able to fire again. Set to 0f to instantly fire again")]
     public float FireTimeout = 0.1f;
@@ -15,7 +17,7 @@ public class ProjectileSystem : MonoBehaviour
     [Tooltip("Projectile prefab to be instantiated when firing")]
     public GameObject[] projectilePrefabs;
     [Tooltip("Force applied to the projectile when fired")]
-    private int prefabIndex = 0;
+    public int prefabIndex = 0;
     public float projectileForce = 500f;
     [Tooltip("Point from which the projectile is fired")]
     public Transform firePoint;
@@ -30,6 +32,9 @@ public class ProjectileSystem : MonoBehaviour
     void Start()
     {
         _input = GetComponent<StarterAssetsInputs>();
+
+        // Update the UI
+        SetUIColor();
     }
 
     void Update()
@@ -75,10 +80,23 @@ public class ProjectileSystem : MonoBehaviour
             {
                 prefabIndex = (prefabIndex + 1) % projectilePrefabs.Length;
             }
-            else if (_input.switchValue < 0f)
+            else if (_input.switchValue < 1f)
             {
+                Debug.Log("negative");
                 prefabIndex = (prefabIndex - 1 + projectilePrefabs.Length) % projectilePrefabs.Length;
             }
+
+            // Update the UI
+            SetUIColor();
+
+            // Reset the pressed flag
+            _input.switchPressed = false;
         }
+    }
+
+    void SetUIColor()
+    {
+        Color currentPrefabColor = projectilePrefabs[prefabIndex].GetComponent<MeshRenderer>().sharedMaterial.color;
+        elementUI.color = currentPrefabColor;
     }
 }

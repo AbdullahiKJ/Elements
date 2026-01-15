@@ -2,15 +2,19 @@ using UnityEngine;
 
 public class ElementProjectile : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public ElementData elementData;
 
-    // Update is called once per frame
-    void Update()
+    void OnCollisionEnter(Collision collision)
     {
-        
+        // Check if the collided object has an IElementReceiver component
+        IElementReceiver receiver = collision.gameObject.GetComponent<IElementReceiver>();
+        if (receiver != null)
+        {
+            // Receive the incoming element
+            receiver.ReceiveElement(elementData, collision.contacts[0].point);
+        }
+
+        // Destroy projectile
+        Destroy(this.gameObject);
     }
 }

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17d3e6872d4414e9ca627622c81e86e7, type: 3}
-  m_Name: Air
+  m_Name: Ice
   m_EditorClassIdentifier: Assembly-CSharp::ElementData
   type: 3
   intensity: 0

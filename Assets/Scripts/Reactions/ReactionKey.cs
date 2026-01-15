@@ -4,7 +4,8 @@ using System;
 public struct ReactionKey : IEquatable<ReactionKey>
 {
     public ElementType element;
-    public StatusType status;
+    public EnvironmentStatusType status;
+    public SurfaceType surfaceType;
 
     public bool Equals(ReactionKey other)
     {
