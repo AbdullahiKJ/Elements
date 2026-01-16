@@ -9,7 +9,7 @@ public struct ReactionKey : IEquatable<ReactionKey>
 
     public bool Equals(ReactionKey other)
     {
-        return element == other.element && status == other.status;
+        return element == other.element && status == other.status && surfaceType == other.surfaceType;
     }
 
     public override bool Equals(object obj)
@@ -19,6 +19,6 @@ public struct ReactionKey : IEquatable<ReactionKey>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(element, status);
+        return HashCode.Combine(element, status, surfaceType);
     }
 }

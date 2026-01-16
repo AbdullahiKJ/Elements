@@ -2,14 +2,12 @@ using UnityEngine;
 
 public class EnvironmentalStatusController : MonoBehaviour
 {
-    public EnvironmentStatusType CurrentStatus { get; private set; }
-
     [SerializeField] ReactionResolver reactionResolver;
     public EnvironmentStatusType ProcessElement(ElementData element, Vector3 hitPoint, SurfaceType surfaceType, EnvironmentStatusType currentStatus)
     {
         if (reactionResolver.TryGetReaction(
             element.type,
-            CurrentStatus,
+            currentStatus,
             surfaceType,
             out ReactionResult result))
         {

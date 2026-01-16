@@ -13,7 +13,7 @@ public class EnvironmentGridCell : MonoBehaviour, IElementReceiver
     public void ReceiveElement(ElementData element, Vector3 hitPoint)
     {
         // For now, just debug
-        Debug.Log($"Element {element.type} hit cell {gridPosition}");
+        Debug.Log($"{element.type} element hit {currentStatus} {surfaceType} cell at {gridPosition} ");
         currentStatus = statusController.ProcessElement(element, hitPoint, surfaceType, currentStatus);
         ApplyVisuals();
     }
