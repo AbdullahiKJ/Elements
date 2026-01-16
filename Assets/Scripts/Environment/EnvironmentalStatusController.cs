@@ -3,7 +3,7 @@ using UnityEngine;
 public class EnvironmentalStatusController : MonoBehaviour
 {
     [SerializeField] ReactionResolver reactionResolver;
-    public EnvironmentStatusType ProcessElement(ElementData element, Vector3 hitPoint, SurfaceType surfaceType, EnvironmentStatusType currentStatus)
+    public EnvironmentStatusType ProcessElement(ElementData element, SurfaceType surfaceType, EnvironmentStatusType currentStatus)
     {
         if (reactionResolver.TryGetReaction(
             element.type,

@@ -10,11 +10,11 @@ public class EnvironmentGridCell : MonoBehaviour, IElementReceiver
     public Renderer groundRenderer;
     public EnvironmentalStatusController statusController;
 
-    public void ReceiveElement(ElementData element, Vector3 hitPoint)
+    public void ReceiveElement(ElementData element)
     {
         // For now, just debug
         Debug.Log($"{element.type} element hit {currentStatus} {surfaceType} cell at {gridPosition} ");
-        currentStatus = statusController.ProcessElement(element, hitPoint, surfaceType, currentStatus);
+        currentStatus = statusController.ProcessElement(element, surfaceType, currentStatus);
         ApplyVisuals();
     }
 
