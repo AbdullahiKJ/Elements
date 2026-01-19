@@ -16,11 +16,6 @@ public class EnvironmentGridCellEditor : Editor
         cell.currentStatus = (EnvironmentStatusType)EditorGUILayout.EnumPopup(
             "Current Status", cell.currentStatus);
 
-        if (GUILayout.Button("Apply Visuals"))
-        {
-            cell.ApplyVisuals();
-        }
-
         if (GUI.changed)
         {
             EditorUtility.SetDirty(cell);

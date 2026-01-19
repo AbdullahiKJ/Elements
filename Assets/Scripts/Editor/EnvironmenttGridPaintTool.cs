@@ -86,7 +86,7 @@ public class EnvironmentGridPaintTool : EditorTool
                     break;
             }
 
-            cell.ApplyVisuals();
+            grid.ApplyVisuals(cell);
             EditorUtility.SetDirty(cell);
         }
     }
