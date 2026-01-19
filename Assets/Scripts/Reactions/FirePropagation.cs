@@ -10,6 +10,8 @@ public class FireCluster
     public float propagationInterval;
     public float burnDuration;
 
+    public bool hasPropagated;
+
     // Constructor
     public FireCluster(float propagationInterval = 1f, float burnDuration = 6f)
     {
@@ -30,7 +32,7 @@ public class FirePropagationSystem
 
     public void RegisterBurningCell(EnvironmentGridCell cell)
     {
-        if (IsRegistered(cell))
+        if (cell.IsBurning)
             return;
 
         FireCluster cluster = FindAdjacentCluster(cell);
@@ -39,19 +41,6 @@ public class FirePropagationSystem
             CreateNewCluster(cell);
         else
             cluster.cells.Add(cell);
-    }
-
-    private bool IsRegistered(EnvironmentGridCell cell)
-    {
-        foreach (var cluster in clusters)
-        {
-            foreach (var c in cluster.cells)
-            {
-                if (cell.gridPosition == c.gridPosition)
-                    return true;
-            }
-        }
-        return false;
     }
 
     private void CreateNewCluster(EnvironmentGridCell cell)
@@ -85,10 +74,10 @@ public class FirePropagationSystem
             cluster.propagationTimer += deltaTime;
             cluster.burnTimer += deltaTime;
 
-            if (cluster.propagationTimer >= cluster.propagationInterval)
+            if (cluster.propagationTimer >= cluster.propagationInterval && !cluster.hasPropagated)
             {
                 TryPropagate(cluster);
-                cluster.propagationTimer = 0f;
+                cluster.hasPropagated = true;
             }
 
             if (cluster.burnTimer >= cluster.burnDuration)
@@ -124,14 +113,18 @@ public class FirePropagationSystem
             }
         }
 
-        FireCluster newCluster = new();
-
-        foreach (var cell in newCells)
+        if (newCells.Count > 0)
         {
-            grid.SetCellBurning(cell);
-            newCluster.cells.Add(cell);
+            FireCluster newCluster = new();
+
+            foreach (var cell in newCells)
+            {
+                grid.SetCellBurning(cell);
+                newCluster.cells.Add(cell);
+            }
+
+            clusters.Add(newCluster);
         }
-        clusters.Add(newCluster);
     }
 
     private void BurnOutCluster(FireCluster cluster)

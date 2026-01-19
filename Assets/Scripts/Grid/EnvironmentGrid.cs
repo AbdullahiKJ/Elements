@@ -122,12 +122,12 @@ public class EnvironmentGrid : MonoBehaviour
 
     public void OnCellHit(ElementData element, EnvironmentGridCell cell, EnvironmentStatusType newStatus)
     {
-        // Apply the new status type
-        cell.currentStatus = newStatus;
-
         // Handle fire element interactions
         if (cell.surfaceType == SurfaceType.Grass && newStatus == EnvironmentStatusType.Burning)
             fireSystem.RegisterBurningCell(cell);
+
+        // Apply the new status type
+        cell.currentStatus = newStatus;
 
         // Apply visuals to the affected cell
         ApplyVisuals(cell);
