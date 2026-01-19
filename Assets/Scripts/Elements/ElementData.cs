@@ -12,6 +12,6 @@ public enum ElementType
 public class ElementData : ScriptableObject
 {
     public ElementType type;
-    public float intensity;
+    public int spreadRadius;
     public GameObject hitVFX;
 }

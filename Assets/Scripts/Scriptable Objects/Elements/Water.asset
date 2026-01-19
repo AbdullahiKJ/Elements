@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Water
   m_EditorClassIdentifier: Assembly-CSharp::ElementData
   type: 1
-  intensity: 0
+  spreadRadius: 2
   hitVFX: {fileID: 0}

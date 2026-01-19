@@ -120,7 +120,7 @@ public class EnvironmentGrid : MonoBehaviour
         return (dx == 1 && dy == 0) || (dx == 0 && dy == 1);
     }
 
-    public void OnCellHit(ElementData element, EnvironmentGridCell cell, EnvironmentStatusType newStatus)
+    public void OnCellHit(ElementData element, EnvironmentGridCell cell, EnvironmentStatusType newStatus, bool splash = true)
     {
         // Handle fire element interactions
         if (cell.surfaceType == SurfaceType.Grass && newStatus == EnvironmentStatusType.Burning)
@@ -131,6 +131,9 @@ public class EnvironmentGrid : MonoBehaviour
 
         // Apply visuals to the affected cell
         ApplyVisuals(cell);
+
+        if (splash && element.spreadRadius != 0)
+            ApplySplash(cell, element);
     }
 
     public void SetCellBurning(EnvironmentGridCell cell)
@@ -164,7 +167,7 @@ public class EnvironmentGrid : MonoBehaviour
                 baseColor = Color.red;
                 break;
             case EnvironmentStatusType.Wet:
-                baseColor *= 0.7f;
+                baseColor = Color.darkGreen;
                 break;
             case EnvironmentStatusType.Frozen:
                 baseColor = Color.teal;
@@ -181,4 +184,37 @@ public class EnvironmentGrid : MonoBehaviour
         cell.groundRenderer.sharedMaterial = tempMaterial;
     }
 
+    void ApplySplash(EnvironmentGridCell hitCell, ElementData elementData)
+    {
+        foreach (var cell in GetCellsInRadius(hitCell, elementData.spreadRadius))
+        {
+            EnvironmentStatusType newStatus = cell.GetNewStatus(elementData);
+            OnCellHit(elementData, cell, newStatus, false);
+        }
+    }
+
+    public IEnumerable<EnvironmentGridCell> GetCellsInRadius(EnvironmentGridCell center, int radius)
+    {
+        Vector2Int c = center.gridPosition;
+        int radiusSq = radius * radius;
+
+        for (int x = -radius; x <= radius; x++)
+        {
+            for (int y = -radius; y <= radius; y++)
+            {
+                int distSq = x * x + y * y;
+                if (distSq > radiusSq)
+                    continue;
+
+                Vector2Int pos = c + new Vector2Int(x, y);
+
+                if (!IsWithinBounds(pos))
+                    continue;
+
+                var cell = grid[pos.x, pos.y];
+                if (cell != null)
+                    yield return cell;
+            }
+        }
+    }
 }

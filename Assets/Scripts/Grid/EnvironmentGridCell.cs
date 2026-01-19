@@ -14,11 +14,18 @@ public class EnvironmentGridCell : MonoBehaviour, IElementReceiver
 
     public void ReceiveElement(ElementData element)
     {
-        // For now, just debug
-        Debug.Log($"{element.type} element hit {currentStatus} {surfaceType} cell at {gridPosition} ");
-        EnvironmentStatusType newStatus = statusController.ProcessElement(element, surfaceType, currentStatus);
+        // Get the resulting status
+        EnvironmentStatusType newStatus = GetNewStatus(element);
 
         // Send this information to the grid
         grid.OnCellHit(element, this, newStatus);
+    }
+
+    public EnvironmentStatusType GetNewStatus(ElementData element)
+    {
+        // For now, just debug
+        Debug.Log($"{element.type} element hit {currentStatus} {surfaceType} cell at {gridPosition} ");
+        EnvironmentStatusType newStatus = statusController.ProcessElement(element, surfaceType, currentStatus);
+        return newStatus;
     }
 }
