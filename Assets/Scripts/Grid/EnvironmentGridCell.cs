@@ -6,6 +6,7 @@ public class EnvironmentGridCell : MonoBehaviour, IElementReceiver
     public SurfaceType surfaceType;
     public EnvironmentStatusType currentStatus;
     public bool IsBurning => currentStatus == EnvironmentStatusType.Burning;
+    public FireCluster fireCluster;
 
     [Header("Visuals")]
     public Renderer groundRenderer;

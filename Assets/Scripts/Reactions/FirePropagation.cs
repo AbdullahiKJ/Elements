@@ -42,7 +42,25 @@ public class FirePropagationSystem
         if (cluster == null)
             CreateNewCluster(cell);
         else
+        {
             cluster.cells.Add(cell);
+            cell.fireCluster = cluster;
+        }
+    }
+
+    public void DeregisterBurningCell(EnvironmentGridCell cell)
+    {
+        var cluster = cell.fireCluster;
+        if (cluster == null)
+            return;
+
+        // Remove the cell from the cluster and reassign the cell cluster to null
+        cluster.cells.Remove(cell);
+        cell.fireCluster = null;
+
+        // Remove the cluster from the list of all clusters if empty
+        if (cluster.cells.Count == 0)
+            clusters.Remove(cluster);
     }
 
     private void CreateNewCluster(EnvironmentGridCell cell)
@@ -50,6 +68,7 @@ public class FirePropagationSystem
         var cluster = new FireCluster();
 
         cluster.cells.Add(cell);
+        cell.fireCluster = cluster;
         clusters.Add(cluster);
     }
 
@@ -141,6 +160,7 @@ public class FirePropagationSystem
             {
                 grid.SetCellBurning(cell);
                 newCluster.cells.Add(cell);
+                cell.fireCluster = newCluster;
             }
 
             clusters.Add(newCluster);
@@ -159,6 +179,7 @@ public class FirePropagationSystem
 
             cell.currentStatus = EnvironmentStatusType.None;
             cell.surfaceType = SurfaceType.Dirt;
+            cell.fireCluster = null;
             grid.ApplyVisuals(cell);
         }
     }

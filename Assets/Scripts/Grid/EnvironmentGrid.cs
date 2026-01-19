@@ -125,6 +125,8 @@ public class EnvironmentGrid : MonoBehaviour
         // Handle fire element interactions
         if (cell.surfaceType == SurfaceType.Grass && newStatus == EnvironmentStatusType.Burning)
             fireSystem.RegisterBurningCell(cell);
+        else
+            fireSystem.DeregisterBurningCell(cell);
 
         // Apply the new status type
         cell.currentStatus = newStatus;
