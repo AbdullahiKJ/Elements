@@ -45,6 +45,14 @@ MonoBehaviour:
       reactionVFX: {fileID: 0}
       duration: 0
       reactionMaterial: {fileID: 2100000, guid: 35049742fc54b4de08d975450beaee53, type: 2}
+  - surfaceType: 0
+    existingStatus: 0
+    element: 1
+    result:
+      newStatus: 3
+      reactionVFX: {fileID: 0}
+      duration: 0
+      reactionMaterial: {fileID: 2100000, guid: 69a00dc7809dc4d6ea5bb7907d2f56d7, type: 2}
   - surfaceType: 1
     existingStatus: 0
     element: 1

@@ -11,12 +11,14 @@ public class FireCluster
     public float burnDuration;
 
     public bool hasPropagated;
+    public float propagationSpeed;
 
     // Constructor
-    public FireCluster(float propagationInterval = 1f, float burnDuration = 6f)
+    public FireCluster(float propagationInterval = 5f, float burnDuration = 10f, float propagationSpeed = 2f)
     {
         this.propagationInterval = propagationInterval;
         this.burnDuration = burnDuration;
+        this.propagationSpeed = propagationSpeed;
     }
 }
 
@@ -91,26 +93,44 @@ public class FirePropagationSystem
 
     private void TryPropagate(FireCluster cluster)
     {
+        HashSet<EnvironmentGridCell> currentPool = new(cluster.cells);
+        HashSet<EnvironmentGridCell> visited = new(cluster.cells);
+
         HashSet<EnvironmentGridCell> newCells = new();
 
-        foreach (var cell in cluster.cells)
+        for (int i = 0; i < cluster.propagationSpeed; i++)
         {
-            if (cell == null)
-                continue;
+            HashSet<EnvironmentGridCell> nextPool = new();
 
-            foreach (var neighbor in grid.GetNeighbors(cell))
+            foreach (var cell in currentPool)
             {
-                if (neighbor == null)
+                if (cell == null)
                     continue;
 
-                if (neighbor.surfaceType != SurfaceType.Grass)
-                    continue;
+                foreach (var neighbor in grid.GetNeighbors(cell))
+                {
+                    if (neighbor == null)
+                        continue;
 
-                if (neighbor.IsBurning || neighbor.currentStatus == EnvironmentStatusType.Wet || neighbor.currentStatus == EnvironmentStatusType.Frozen)
-                    continue;
+                    if (visited.Contains(neighbor))
+                        continue;
 
-                newCells.Add(neighbor);
+                    if (neighbor.surfaceType != SurfaceType.Grass)
+                        continue;
+
+                    if (neighbor.IsBurning || neighbor.currentStatus == EnvironmentStatusType.Wet || neighbor.currentStatus == EnvironmentStatusType.Frozen)
+                        continue;
+
+                    newCells.Add(neighbor);
+                    visited.Add(neighbor);
+                    nextPool.Add(neighbor);
+                }
             }
+
+            if (nextPool.Count == 0)
+                break;
+
+            currentPool = nextPool;
         }
 
         if (newCells.Count > 0)
