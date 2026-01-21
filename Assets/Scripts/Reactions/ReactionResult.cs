@@ -7,5 +7,5 @@ public class ReactionResult
     public GameObject reactionVFX;
     public float duration;
     [Header("Debug")]
-    public Material reactionMaterial;
+    public int terrainLayer = -1;
 }

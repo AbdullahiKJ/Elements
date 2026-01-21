@@ -6,9 +6,9 @@ public class ElementSurface : MonoBehaviour, IElementReceiver
     public EnvironmentStatusType currentStatus;
     public EnvironmentalStatusController statusController;
 
-    public void ReceiveElement(ElementData element)
+    public void ReceiveElement(ElementData element, Vector3 hitPoint)
     {
-        // todo: get grid data if applicable
-        currentStatus = statusController.ProcessElement(element, surfaceType, currentStatus);
+        ReactionResult newResult = statusController.ProcessElement(element, surfaceType, currentStatus);
+        currentStatus = newResult.newStatus;
     }
 }

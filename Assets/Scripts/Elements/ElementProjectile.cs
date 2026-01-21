@@ -11,7 +11,7 @@ public class ElementProjectile : MonoBehaviour
         if (receiver != null)
         {
             // Receive the incoming element
-            receiver.ReceiveElement(elementData);
+            receiver.ReceiveElement(elementData, transform.position);
         }
 
         // Destroy projectile

@@ -3,19 +3,32 @@ using UnityEngine;
 
 public class EnvironmentGrid : MonoBehaviour
 {
+    [Header("Grid Settings")]
     public int width = 10;
     public int height = 10;
     public float cellSize = 1f;
+    public Vector3 origin;
 
-    public EnvironmentGridCell cellPrefab;
     public EnvironmentalStatusController statusController;
     private EnvironmentGridCell[,] grid;
     private FirePropagationSystem fireSystem;
+    public GameObject fireVFX;
+
+    [Header("Terrain Settings")]
+    public Terrain terrain;
+    TerrainData terrainData;
+    Vector3 terrainPos;
+    int alphamapWidth;
+    int alphamapHeight;
+    int layers;
+    float[,,] alphamaps;
 
     void Start()
     {
         fireSystem = new FirePropagationSystem(this);
-        GetGrid();
+
+        GenerateGrid();
+        InitializeFromTerrain();
     }
 
     void Update()
@@ -35,45 +48,146 @@ public class EnvironmentGrid : MonoBehaviour
                 Vector3 worldPos = transform.position +
                     new Vector3(x * cellSize, 0, y * cellSize);
 
-                var cell = Instantiate(cellPrefab, worldPos, Quaternion.identity, transform);
-                cell.gridPosition = new Vector2Int(x, y);
-                cell.surfaceType = SurfaceType.Grass;
-                cell.currentStatus = EnvironmentStatusType.None;
-
-                // Set the renderer
-                cell.groundRenderer = cell.GetComponent<Renderer>();
-
-                // Apply cell visuals
-                ApplyVisuals(cell);
-
-                // Set the controller
-                cell.statusController = statusController;
-
-                // Set the grid
-                cell.grid = this;
-
-                grid[x, y] = cell;
+                grid[x, y] = new EnvironmentGridCell
+                {
+                    gridPosition = new Vector2Int(x, y),
+                    surfaceType = SurfaceType.Grass,
+                    currentStatus = EnvironmentStatusType.None
+                };
             }
         }
+
+        InitializeFromTerrain();
     }
 
     public void ClearGrid()
     {
-        for (int i = transform.childCount - 1; i >= 0; i--)
+        grid = new EnvironmentGridCell[width, height];
+    }
+
+    void InitializeFromTerrain()
+    {
+        if (terrain == null)
+            return;
+
+        terrainData = terrain.terrainData;
+        terrainPos = terrain.transform.position;
+
+        alphamapWidth = terrainData.alphamapWidth;
+        alphamapHeight = terrainData.alphamapHeight;
+        layers = terrainData.alphamapLayers;
+
+        alphamaps = terrainData.GetAlphamaps(0, 0, alphamapWidth, alphamapHeight);
+
+        for (int x = 0; x < width; x++)
         {
-            DestroyImmediate(transform.GetChild(i).gameObject);
+            for (int y = 0; y < height; y++)
+            {
+                // World position at cell center
+                Vector3 worldPos = origin + new Vector3(
+                    (x + 0.5f) * cellSize,
+                    0f,
+                    (y + 0.5f) * cellSize
+                );
+
+                // Convert to terrain UV
+                float normX = (worldPos.x - terrainPos.x) / terrainData.size.x;
+                float normZ = (worldPos.z - terrainPos.z) / terrainData.size.z;
+
+                int mapX = Mathf.Clamp(Mathf.RoundToInt(normX * (alphamapWidth - 1)), 0, alphamapWidth - 1);
+                int mapZ = Mathf.Clamp(Mathf.RoundToInt(normZ * (alphamapHeight - 1)), 0, alphamapHeight - 1);
+
+                (grid[x, y].surfaceType, grid[x, y].currentStatus) = DetermineSurface(alphamaps, mapX, mapZ);
+            }
         }
     }
 
-    void GetGrid()
+    void PaintCell(Vector2Int cellPos, int terrainLayer)
     {
-        grid = new EnvironmentGridCell[width, height];
+        // World space bounds of the cell center
+        Vector3 worldMin = origin + new Vector3(
+            cellPos.x * cellSize,
+            0f,
+            cellPos.y * cellSize
+        );
 
-        EnvironmentGridCell[] cells = this.GetComponentsInChildren<EnvironmentGridCell>();
-        foreach (var cell in cells)
+        Vector3 worldMax = worldMin + new Vector3(cellSize, 0f, cellSize);
+
+        // Convert world to normalized
+        float normMinX = (worldMin.x - terrainPos.x) / terrainData.size.x;
+        float normMaxX = (worldMax.x - terrainPos.x) / terrainData.size.x;
+        float normMinZ = (worldMin.z - terrainPos.z) / terrainData.size.z;
+        float normMaxZ = (worldMax.z - terrainPos.z) / terrainData.size.z;
+
+        // Convert normalized vectors to alphamap indices
+        int startX = Mathf.FloorToInt(normMinX * alphamapWidth);
+        int startZ = Mathf.FloorToInt(normMinZ * alphamapHeight);
+
+        int endX = Mathf.CeilToInt(normMaxX * alphamapWidth);
+        int endZ = Mathf.CeilToInt(normMaxZ * alphamapHeight);
+
+        startX = Mathf.Clamp(startX, 0, alphamapWidth - 1);
+        startZ = Mathf.Clamp(startZ, 0, alphamapHeight - 1);
+        endX = Mathf.Clamp(endX, 0, alphamapWidth);
+        endZ = Mathf.Clamp(endZ, 0, alphamapHeight);
+
+        int paintWidth = endX - startX;
+        int paintHeight = endZ - startZ;
+
+        float[,,] paintData = new float[paintHeight, paintWidth, layers];
+
+        for (int z = 0; z < paintHeight; z++)
         {
-            grid[cell.gridPosition.x, cell.gridPosition.y] = cell;
+            for (int x = 0; x < paintWidth; x++)
+            {
+                for (int l = 0; l < layers; l++)
+                    paintData[z, x, l] = 0f;
+
+                paintData[z, x, terrainLayer] = 1f;
+            }
         }
+
+        terrainData.SetAlphamaps(startX, startZ, paintData);
+    }
+
+    (SurfaceType, EnvironmentStatusType) DetermineSurface(float[,,] alphamaps, int x, int z)
+    {
+        int strongestLayer = 0;
+        float strongestWeight = 0f;
+
+        for (int i = 0; i < alphamaps.GetLength(2); i++)
+        {
+            float weight = alphamaps[z, x, i];
+            if (weight > strongestWeight)
+            {
+                strongestWeight = weight;
+                strongestLayer = i;
+            }
+        }
+
+        return strongestLayer switch
+        {
+            0 => (SurfaceType.Grass, EnvironmentStatusType.None),
+            1 => (SurfaceType.Dirt, EnvironmentStatusType.None),
+            2 => (SurfaceType.Water, EnvironmentStatusType.None),
+            3 => (SurfaceType.Dirt, EnvironmentStatusType.Mud),
+            _ => (SurfaceType.Grass, EnvironmentStatusType.None),
+        };
+    }
+
+    public bool TryGetCellFromWorld(Vector3 worldPos, out EnvironmentGridCell cell)
+    {
+        int x = Mathf.FloorToInt((worldPos.x - origin.x) / cellSize);
+        int y = Mathf.FloorToInt((worldPos.z - origin.z) / cellSize);
+
+        if (x < 0 || x >= width || y < 0 || y >= height)
+        {
+            cell = null;
+            return false;
+        }
+
+        cell = grid[x, y];
+        return true;
     }
 
     private static readonly Vector2Int[] NeighborOffsets4 =
@@ -85,8 +199,7 @@ public class EnvironmentGrid : MonoBehaviour
     };
 
     // Get four cardinal neighbors
-    public IEnumerable<EnvironmentGridCell> GetNeighbors(
-        EnvironmentGridCell cell)
+    public IEnumerable<EnvironmentGridCell> GetNeighbors(EnvironmentGridCell cell)
     {
         if (cell == null)
             yield break;
@@ -120,19 +233,20 @@ public class EnvironmentGrid : MonoBehaviour
         return (dx == 1 && dy == 0) || (dx == 0 && dy == 1);
     }
 
-    public void OnCellHit(ElementData element, EnvironmentGridCell cell, EnvironmentStatusType newStatus, bool splash = true)
+    public void OnCellHit(ElementData element, EnvironmentGridCell cell, ReactionResult result, bool splash = true)
     {
         // Handle fire element interactions
-        if (cell.surfaceType == SurfaceType.Grass && newStatus == EnvironmentStatusType.Burning)
+        if (cell.surfaceType == SurfaceType.Grass && result != null && result.newStatus == EnvironmentStatusType.Burning)
             fireSystem.RegisterBurningCell(cell);
         else
             fireSystem.DeregisterBurningCell(cell);
 
         // Apply the new status type
-        cell.currentStatus = newStatus;
+        if (result != null)
+            cell.currentStatus = result.newStatus;
 
         // Apply visuals to the affected cell
-        ApplyVisuals(cell);
+        ApplyVisuals(cell, result);
 
         if (splash && element.spreadRadius != 0)
             ApplySplash(cell, element);
@@ -141,58 +255,37 @@ public class EnvironmentGrid : MonoBehaviour
     public void SetCellBurning(EnvironmentGridCell cell)
     {
         cell.currentStatus = EnvironmentStatusType.Burning;
-        ApplyVisuals(cell);
+        ReactionResult burningResult = new ReactionResult
+        {
+            reactionVFX = fireVFX,
+        };
+        ApplyVisuals(cell, burningResult);
     }
 
 
     // Update a cell's visuals
-    public void ApplyVisuals(EnvironmentGridCell cell)
+    public void ApplyVisuals(EnvironmentGridCell cell, ReactionResult result)
     {
-        Color baseColor = Color.white;
+        if (result == null)
+            return;
 
-        switch (cell.surfaceType)
-        {
-            case SurfaceType.Grass:
-                baseColor = Color.green;
-                break;
-            case SurfaceType.Dirt:
-                baseColor = new Color(0.5f, 0.25f, 0.1f);
-                break;
-            case SurfaceType.Water:
-                baseColor = Color.blue;
-                break;
-        }
-
-        switch (cell.currentStatus)
-        {
-            case EnvironmentStatusType.Burning:
-                baseColor = Color.red;
-                break;
-            case EnvironmentStatusType.Wet:
-                baseColor = Color.darkGreen;
-                break;
-            case EnvironmentStatusType.Frozen:
-                baseColor = Color.teal;
-                break;
-            case EnvironmentStatusType.Mud:
-                baseColor = Color.brown;
-                break;
-            default:
-                break;
-        }
-
-        var tempMaterial = new Material(cell.groundRenderer.sharedMaterial);
-        tempMaterial.color = baseColor;
-        cell.groundRenderer.sharedMaterial = tempMaterial;
+        // Check if result has a terrain layer to paint
+        if (result.terrainLayer >= 0)
+            PaintCell(cell.gridPosition, result.terrainLayer);
     }
 
     void ApplySplash(EnvironmentGridCell hitCell, ElementData elementData)
     {
         foreach (var cell in GetCellsInRadius(hitCell, elementData.spreadRadius))
         {
-            EnvironmentStatusType newStatus = cell.GetNewStatus(elementData);
-            OnCellHit(elementData, cell, newStatus, false);
+            ReactionResult newResult = GetNewReaction(elementData, cell);
+            OnCellHit(elementData, cell, newResult, false);
         }
+    }
+
+    ReactionResult GetNewReaction(ElementData elementData, EnvironmentGridCell cell)
+    {
+        return statusController.ProcessElement(elementData, cell.surfaceType, cell.currentStatus);
     }
 
     public IEnumerable<EnvironmentGridCell> GetCellsInRadius(EnvironmentGridCell center, int radius)
@@ -218,5 +311,71 @@ public class EnvironmentGrid : MonoBehaviour
                     yield return cell;
             }
         }
+    }
+
+    public Vector2Int WorldToGrid(Vector3 worldPos)
+    {
+        int x = Mathf.FloorToInt((worldPos.x - this.transform.position.x) / cellSize);
+        int y = Mathf.FloorToInt((worldPos.z - this.transform.position.z) / cellSize);
+        return new Vector2Int(x, y);
+    }
+
+    // Display grid in the editor
+    void OnDrawGizmos()
+    {
+        if (grid == null)
+            return;
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                var cell = grid[x, y];
+                if (cell == null)
+                    continue;
+
+                Vector3 pos = origin + new Vector3(
+                    (x + 0.5f) * cellSize,
+                    0f,
+                    (y + 0.5f) * cellSize
+                );
+
+                // Set color based on surface / status
+                Gizmos.color = GetCellColor(cell);
+
+                // Draw a cube or square
+                Gizmos.DrawCube(pos, Vector3.one * (cellSize * 0.9f));
+            }
+        }
+    }
+
+    Color GetCellColor(EnvironmentGridCell cell)
+    {
+        Color baseColor = cell.surfaceType switch
+        {
+            SurfaceType.Grass => Color.green,
+            SurfaceType.Dirt => new Color(0.5f, 0.25f, 0.1f),
+            SurfaceType.Water => Color.blue,
+            _ => Color.white
+        };
+
+        // Overlay status
+        switch (cell.currentStatus)
+        {
+            case EnvironmentStatusType.Burning:
+                baseColor = Color.red;
+                break;
+            case EnvironmentStatusType.Frozen:
+                baseColor = Color.cyan;
+                break;
+            case EnvironmentStatusType.Wet:
+                baseColor = Color.darkGreen;
+                break;
+            case EnvironmentStatusType.Mud:
+                baseColor = Color.brown;
+                break;
+        }
+
+        return baseColor;
     }
 }

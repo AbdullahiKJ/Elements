@@ -180,7 +180,11 @@ public class FirePropagationSystem
             cell.currentStatus = EnvironmentStatusType.None;
             cell.surfaceType = SurfaceType.Dirt;
             cell.fireCluster = null;
-            grid.ApplyVisuals(cell);
+            ReactionResult burnResult = new ReactionResult
+            {
+                terrainLayer = 1,
+            };
+            grid.ApplyVisuals(cell, burnResult);
         }
     }
 
