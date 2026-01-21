@@ -1,24 +1,24 @@
-using UnityEditor;
-using UnityEngine;
+// using UnityEditor;
+// using UnityEngine;
 
-[CustomEditor(typeof(EnvironmentGridCell))]
-public class EnvironmentGridCellEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        EnvironmentGridCell cell = (EnvironmentGridCell)target;
+// [CustomEditor(typeof(EnvironmentGridCell))]
+// public class EnvironmentGridCellEditor : Editor
+// {
+//     public override void OnInspectorGUI()
+//     {
+//         EnvironmentGridCell cell = (EnvironmentGridCell)target;
 
-        EditorGUILayout.LabelField("Grid Position", cell.gridPosition.ToString());
+//         EditorGUILayout.LabelField("Grid Position", cell.gridPosition.ToString());
 
-        cell.surfaceType = (SurfaceType)EditorGUILayout.EnumPopup(
-            "Surface Type", cell.surfaceType);
+//         cell.surfaceType = (SurfaceType)EditorGUILayout.EnumPopup(
+//             "Surface Type", cell.surfaceType);
 
-        cell.currentStatus = (EnvironmentStatusType)EditorGUILayout.EnumPopup(
-            "Current Status", cell.currentStatus);
+//         cell.currentStatus = (EnvironmentStatusType)EditorGUILayout.EnumPopup(
+//             "Current Status", cell.currentStatus);
 
-        if (GUI.changed)
-        {
-            EditorUtility.SetDirty(cell);
-        }
-    }
-}
+//         if (GUI.changed)
+//         {
+//             EditorUtility.SetDirty(cell);
+//         }
+//     }
+// }
