@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class EnvironmentGrid : MonoBehaviour
 {
@@ -12,7 +13,9 @@ public class EnvironmentGrid : MonoBehaviour
     public EnvironmentalStatusController statusController;
     private EnvironmentGridCell[,] grid;
     private FirePropagationSystem fireSystem;
-    public GameObject fireVFX;
+    private FireVisualiser fireVisualiser;
+    public float tickInterval = 1f;
+    public bool canTick = true;
 
     [Header("Terrain Settings")]
     public Terrain terrain;
@@ -22,13 +25,21 @@ public class EnvironmentGrid : MonoBehaviour
     int alphamapHeight;
     int layers;
     float[,,] alphamaps;
+    [Header("Visual Effects")]
+    public VisualEffect fireVFX;
 
     void Start()
     {
-        fireSystem = new FirePropagationSystem(this);
+        fireVisualiser = new FireVisualiser(this);
+        fireSystem = new FirePropagationSystem(this, fireVisualiser);
 
         GenerateGrid();
         InitializeFromTerrain();
+    }
+
+    public void SetCanTick()
+    {
+        canTick = true;
     }
 
     void Update()
@@ -45,9 +56,6 @@ public class EnvironmentGrid : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                Vector3 worldPos = transform.position +
-                    new Vector3(x * cellSize, 0, y * cellSize);
-
                 grid[x, y] = new EnvironmentGridCell
                 {
                     gridPosition = new Vector2Int(x, y),
@@ -84,11 +92,7 @@ public class EnvironmentGrid : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 // World position at cell center
-                Vector3 worldPos = origin + new Vector3(
-                    (x + 0.5f) * cellSize,
-                    0f,
-                    (y + 0.5f) * cellSize
-                );
+                Vector3 worldPos = GetWorldFromCell(new Vector2Int(x, y));
 
                 // Convert to terrain UV
                 float normX = (worldPos.x - terrainPos.x) / terrainData.size.x;
@@ -105,11 +109,7 @@ public class EnvironmentGrid : MonoBehaviour
     void PaintCell(Vector2Int cellPos, int terrainLayer)
     {
         // World space bounds of the cell center
-        Vector3 worldMin = origin + new Vector3(
-            cellPos.x * cellSize,
-            0f,
-            cellPos.y * cellSize
-        );
+        Vector3 worldMin = GetWorldFromCell(cellPos, false);
 
         Vector3 worldMax = worldMin + new Vector3(cellSize, 0f, cellSize);
 
@@ -190,6 +190,20 @@ public class EnvironmentGrid : MonoBehaviour
         return true;
     }
 
+    public Vector3 GetWorldFromCell(Vector2Int gridPos, bool getCenter = true)
+    {
+        if (gridPos == null)
+            return Vector3.zero;
+
+        // World position at cell center
+        Vector3 worldPos = origin + new Vector3(
+            (gridPos.x + (getCenter ? 0.5f : 0f)) * cellSize,
+            0f,
+            (gridPos.y + (getCenter ? 0.5f : 0f)) * cellSize
+        );
+        return worldPos;
+    }
+
     private static readonly Vector2Int[] NeighborOffsets4 =
    {
     new(1, 0),
@@ -255,10 +269,7 @@ public class EnvironmentGrid : MonoBehaviour
     public void SetCellBurning(EnvironmentGridCell cell)
     {
         cell.currentStatus = EnvironmentStatusType.Burning;
-        ReactionResult burningResult = new ReactionResult
-        {
-            reactionVFX = fireVFX,
-        };
+        ReactionResult burningResult = new ReactionResult();
         ApplyVisuals(cell, burningResult);
     }
 

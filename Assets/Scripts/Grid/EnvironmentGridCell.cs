@@ -7,4 +7,5 @@ public class EnvironmentGridCell
     public EnvironmentStatusType currentStatus;
     public bool IsBurning => currentStatus == EnvironmentStatusType.Burning;
     public FireCluster fireCluster;
+    public float fireIntensity = 0f;
 }

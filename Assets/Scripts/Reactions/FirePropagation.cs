@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public class FireCluster
 {
@@ -26,10 +27,12 @@ public class FirePropagationSystem
 {
     private List<FireCluster> clusters = new();
     private EnvironmentGrid grid;
+    private FireVisualiser fireVisualiser;
 
-    public FirePropagationSystem(EnvironmentGrid grid)
+    public FirePropagationSystem(EnvironmentGrid grid, FireVisualiser fireVisualiser)
     {
         this.grid = grid;
+        this.fireVisualiser = fireVisualiser;
     }
 
     public void RegisterBurningCell(EnvironmentGridCell cell)
@@ -46,6 +49,9 @@ public class FirePropagationSystem
             cluster.cells.Add(cell);
             cell.fireCluster = cluster;
         }
+
+        // Set the fire intensity for the new cell
+        fireVisualiser.SetFireIntensity(cell, 1f);
     }
 
     public void DeregisterBurningCell(EnvironmentGridCell cell)
@@ -61,6 +67,9 @@ public class FirePropagationSystem
         // Remove the cluster from the list of all clusters if empty
         if (cluster.cells.Count == 0)
             clusters.Remove(cluster);
+
+        // Set the fire intensity for the new cell
+        fireVisualiser.SetFireIntensity(cell, 0f);
     }
 
     private void CreateNewCluster(EnvironmentGridCell cell)
@@ -95,6 +104,23 @@ public class FirePropagationSystem
             cluster.propagationTimer += deltaTime;
             cluster.burnTimer += deltaTime;
 
+            // Update the fire intensity of each burning cell
+            foreach (var cell in cluster.cells)
+            {
+                float newIntensity = cell.fireIntensity - deltaTime / cluster.burnDuration;
+                newIntensity = Mathf.Max(0, newIntensity);
+
+                if (grid.canTick)
+                    fireVisualiser.SetFireIntensity(cell, newIntensity);
+            }
+
+            // Reset the grid tick flag
+            if (grid.canTick)
+            {
+                grid.canTick = false;
+                grid.Invoke("SetCanTick", grid.tickInterval);
+            }
+
             if (cluster.propagationTimer >= cluster.propagationInterval && !cluster.hasPropagated)
             {
                 TryPropagate(cluster);
@@ -106,6 +132,13 @@ public class FirePropagationSystem
                 BurnOutCluster(cluster);
                 clusters.RemoveAt(i);
             }
+        }
+
+        // Update the fire texure if any changes were made
+        if (fireVisualiser.fireMapDirty)
+        {
+            fireVisualiser.UpdateFireTexture();
+            fireVisualiser.fireMapDirty = false;
         }
     }
 
@@ -161,6 +194,7 @@ public class FirePropagationSystem
                 grid.SetCellBurning(cell);
                 newCluster.cells.Add(cell);
                 cell.fireCluster = newCluster;
+                fireVisualiser.SetFireIntensity(cell, 1f);
             }
 
             clusters.Add(newCluster);
@@ -185,6 +219,9 @@ public class FirePropagationSystem
                 terrainLayer = 1,
             };
             grid.ApplyVisuals(cell, burnResult);
+
+            // Set the fire intensity for the new cell
+            fireVisualiser.SetFireIntensity(cell, 0f);
         }
     }
 

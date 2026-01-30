@@ -67,5 +67,6 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "Elements.slnx"
+    "dotnet.defaultSolution": "Elements.slnx",
+    "dotnet.preferCSharpExtension": true
 }
