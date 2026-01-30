@@ -218,7 +218,7 @@ public class FirePropagationSystem
             {
                 terrainLayer = 1,
             };
-            grid.ApplyVisuals(cell, burnResult);
+            grid.ApplyVisuals(cell, burnResult, true);
 
             // Set the fire intensity for the new cell
             fireVisualiser.SetFireIntensity(cell, 0f);

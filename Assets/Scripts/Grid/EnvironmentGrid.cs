@@ -106,7 +106,7 @@ public class EnvironmentGrid : MonoBehaviour
         }
     }
 
-    void PaintCell(Vector2Int cellPos, int terrainLayer)
+    void PaintCell(Vector2Int cellPos, int terrainLayer, bool removeGrass = false)
     {
         // World space bounds of the cell center
         Vector3 worldMin = GetWorldFromCell(cellPos, false);
@@ -148,6 +148,48 @@ public class EnvironmentGrid : MonoBehaviour
         }
 
         terrainData.SetAlphamaps(startX, startZ, paintData);
+
+        // Remove grass if needed
+        if (removeGrass)
+        {
+            int detailWidth = terrainData.detailWidth;
+            int detailHeight = terrainData.detailHeight;
+
+            startX = Mathf.FloorToInt(normMinX * detailWidth);
+            startZ = Mathf.FloorToInt(normMinZ * detailHeight);
+            endX = Mathf.CeilToInt(normMaxX * detailWidth);
+            endZ = Mathf.CeilToInt(normMaxZ * detailHeight);
+
+            startX = Mathf.Clamp(startX, 0, detailWidth - 1);
+            startZ = Mathf.Clamp(startZ, 0, detailHeight - 1);
+            endX = Mathf.Clamp(endX, 0, detailWidth);
+            endZ = Mathf.Clamp(endZ, 0, detailHeight);
+
+            int detailPaintWidth = endX - startX;
+            int detailPaintHeight = endZ - startZ;
+
+            for (int i = 0; i < terrainData.detailPrototypes.Length; i++)
+            {
+                int[,] details = terrainData.GetDetailLayer(
+                    startX,
+                    startZ,
+                    detailPaintWidth,
+                    detailPaintHeight,
+                    i
+                );
+
+                for (int z = 0; z < detailPaintHeight; z++)
+                    for (int x = 0; x < detailPaintWidth; x++)
+                        details[z, x] = 0;
+
+                terrainData.SetDetailLayer(
+                    startX,
+                    startZ,
+                    i,
+                    details
+                );
+            }
+        }
     }
 
     (SurfaceType, EnvironmentStatusType) DetermineSurface(float[,,] alphamaps, int x, int z)
@@ -275,14 +317,14 @@ public class EnvironmentGrid : MonoBehaviour
 
 
     // Update a cell's visuals
-    public void ApplyVisuals(EnvironmentGridCell cell, ReactionResult result)
+    public void ApplyVisuals(EnvironmentGridCell cell, ReactionResult result, bool removeGrass = false)
     {
         if (result == null)
             return;
 
         // Check if result has a terrain layer to paint
         if (result.terrainLayer >= 0)
-            PaintCell(cell.gridPosition, result.terrainLayer);
+            PaintCell(cell.gridPosition, result.terrainLayer, removeGrass);
     }
 
     void ApplySplash(EnvironmentGridCell hitCell, ElementData elementData)
