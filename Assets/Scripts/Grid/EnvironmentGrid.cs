@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.VFX;
+using UnityEditor;
 
 public class EnvironmentGrid : MonoBehaviour
 {
@@ -25,6 +26,9 @@ public class EnvironmentGrid : MonoBehaviour
     int alphamapHeight;
     int layers;
     float[,,] alphamaps;
+    int[][,] detailMap;
+    int detailMapLayerCount;
+
     [Header("Visual Effects")]
     public VisualEffect fireVFX;
 
@@ -35,6 +39,22 @@ public class EnvironmentGrid : MonoBehaviour
 
         GenerateGrid();
         InitializeFromTerrain();
+
+        // Register a function that resets the terrain when exiting play mode
+        EditorApplication.playModeStateChanged += (PlayModeStateChange stateChange) =>
+        {
+            if (stateChange == PlayModeStateChange.ExitingPlayMode)
+            {
+                // Reset terrain alphamaps (materials)
+                terrainData.SetAlphamaps(0, 0, alphamaps);
+
+                // Reset detail maps (grass)
+                for (int i = 0; i < detailMapLayerCount; i++)
+                {
+                    terrainData.SetDetailLayer(0, 0, i, detailMap[i]);
+                }
+            }
+        };
     }
 
     public void SetCanTick()
@@ -86,6 +106,14 @@ public class EnvironmentGrid : MonoBehaviour
         layers = terrainData.alphamapLayers;
 
         alphamaps = terrainData.GetAlphamaps(0, 0, alphamapWidth, alphamapHeight);
+
+        detailMapLayerCount = terrainData.detailPrototypes.Length;
+        detailMap = new int[detailMapLayerCount][,];
+        for (int i = 0; i < detailMapLayerCount; i++)
+        {
+            detailMap[i] = terrainData.GetDetailLayer(0, 0, terrainData.detailWidth, terrainData.detailHeight, i);
+
+        }
 
         for (int x = 0; x < width; x++)
         {
@@ -168,7 +196,7 @@ public class EnvironmentGrid : MonoBehaviour
             int detailPaintWidth = endX - startX;
             int detailPaintHeight = endZ - startZ;
 
-            for (int i = 0; i < terrainData.detailPrototypes.Length; i++)
+            for (int i = 0; i < detailMapLayerCount; i++)
             {
                 int[,] details = terrainData.GetDetailLayer(
                     startX,
