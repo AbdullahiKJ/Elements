@@ -29,7 +29,6 @@ public class FireVisualiser
 
         float highestPoint = grid.terrain.terrainData.bounds.max.y;
         float terrainSizeY = grid.terrain.terrainData.size.y;
-        Debug.Log(highestPoint);
         for (int z = 0; z < hmResolution; z++)
         {
             for (int x = 0; x < hmResolution; x++)
