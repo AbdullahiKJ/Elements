@@ -27,15 +27,21 @@ public class FireVisualiser
             false
         );
 
+        float highestPoint = grid.terrain.terrainData.bounds.max.y;
+        float terrainSizeY = grid.terrain.terrainData.size.y;
+        Debug.Log(highestPoint);
         for (int z = 0; z < hmResolution; z++)
         {
             for (int x = 0; x < hmResolution; x++)
             {
-                float h = heights[z, x];
+                float h = heights[z, x] * terrainSizeY / highestPoint;
                 heightMapTexture.SetPixel(x, z, new Color(h, 0, 0));
             }
         }
         heightMapTexture.Apply();
+
+        // Assign the highest point to the vfx
+        grid.fireVFX.SetFloat("TerrainMaxHeight", highestPoint);
 
         fireTexture = new Texture2D(
             grid.width,
