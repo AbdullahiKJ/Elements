@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6364796046123885739}
   - component: {fileID: 8714644144012119064}
   - component: {fileID: -8023543735545959821}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: IceProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
