@@ -66,7 +66,7 @@ MonoBehaviour:
     element: 3
     result:
       newStatus: 4
-      reactionVFX: {fileID: 0}
+      reactionVFX: {fileID: 6148341716912675158, guid: b678d487af8784e44bcdcc6f2c5605e7, type: 3}
       duration: 0
       terrainLayer: -1
   - surfaceType: 2

@@ -17,6 +17,7 @@ public class EnvironmentGrid : MonoBehaviour
     private FireVisualiser fireVisualiser;
     public float tickInterval = 1f;
     public bool canTick = true;
+    public float editorOffset = 10f;
 
     [Header("Terrain Settings")]
     public Terrain terrain;
@@ -24,6 +25,7 @@ public class EnvironmentGrid : MonoBehaviour
     Vector3 terrainPos;
     int alphamapWidth;
     int alphamapHeight;
+    int heightmapResolution;
     int layers;
     float[,,] alphamaps;
     int[][,] detailMap;
@@ -93,6 +95,11 @@ public class EnvironmentGrid : MonoBehaviour
         grid = new EnvironmentGridCell[width, height];
     }
 
+    public void GetGrid(out EnvironmentGridCell[,] outGrid)
+    {
+        outGrid = grid;
+    }
+
     void InitializeFromTerrain()
     {
         if (terrain == null)
@@ -104,6 +111,8 @@ public class EnvironmentGrid : MonoBehaviour
         alphamapWidth = terrainData.alphamapWidth;
         alphamapHeight = terrainData.alphamapHeight;
         layers = terrainData.alphamapLayers;
+
+        heightmapResolution = terrainData.heightmapResolution;
 
         alphamaps = terrainData.GetAlphamaps(0, 0, alphamapWidth, alphamapHeight);
 
@@ -121,6 +130,9 @@ public class EnvironmentGrid : MonoBehaviour
             {
                 // World position at cell center
                 Vector3 worldPos = GetWorldFromCell(new Vector2Int(x, y));
+
+                // Store the world position in the cell
+                grid[x, y].worldPosition = worldPos;
 
                 // Convert to terrain UV
                 float normX = (worldPos.x - terrainPos.x) / terrainData.size.x;
@@ -265,10 +277,13 @@ public class EnvironmentGrid : MonoBehaviour
         if (gridPos == null)
             return Vector3.zero;
 
+        int hmX = Mathf.RoundToInt((float)gridPos.x / (width - 1) * (heightmapResolution - 1));
+        int hmZ = Mathf.RoundToInt((float)gridPos.y / (height - 1) * (heightmapResolution - 1));
+
         // World position at cell center
         Vector3 worldPos = origin + new Vector3(
             (gridPos.x + (getCenter ? 0.5f : 0f)) * cellSize,
-            0f,
+            terrainData.GetHeight(hmX, hmZ) + terrain.transform.position.y,
             (gridPos.y + (getCenter ? 0.5f : 0f)) * cellSize
         );
         return worldPos;
@@ -417,7 +432,7 @@ public class EnvironmentGrid : MonoBehaviour
 
                 Vector3 pos = origin + new Vector3(
                     (x + 0.5f) * cellSize,
-                    0f,
+                    editorOffset,
                     (y + 0.5f) * cellSize
                 );
 

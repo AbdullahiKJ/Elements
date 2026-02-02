@@ -3,6 +3,7 @@ using UnityEngine;
 public class EnvironmentGridCell
 {
     public Vector2Int gridPosition;
+    public Vector3 worldPosition;
     public SurfaceType surfaceType;
     public EnvironmentStatusType currentStatus;
     public bool IsBurning => currentStatus == EnvironmentStatusType.Burning;
