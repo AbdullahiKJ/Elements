@@ -15,6 +15,7 @@ public class EnvironmentGrid : MonoBehaviour
     private EnvironmentGridCell[,] grid;
     private FirePropagationSystem fireSystem;
     private FireVisualiser fireVisualiser;
+    private IcePropagationSystem iceSystem;
     public float tickInterval = 1f;
     public bool canTick = true;
     public float editorOffset = 10f;
@@ -38,6 +39,7 @@ public class EnvironmentGrid : MonoBehaviour
     {
         fireVisualiser = new FireVisualiser(this);
         fireSystem = new FirePropagationSystem(this, fireVisualiser);
+        iceSystem = new IcePropagationSystem(this);
 
         GenerateGrid();
         InitializeFromTerrain();
@@ -339,6 +341,10 @@ public class EnvironmentGrid : MonoBehaviour
             fireSystem.RegisterBurningCell(cell);
         else
             fireSystem.DeregisterBurningCell(cell);
+
+        // Handle ice element interactions
+        if (cell.surfaceType == SurfaceType.Grass && result != null && result.newStatus == EnvironmentStatusType.Frozen)
+            iceSystem.FreezeCell(cell);
 
         // Apply the new status type
         if (result != null)
