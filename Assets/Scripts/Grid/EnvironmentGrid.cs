@@ -371,6 +371,9 @@ public class EnvironmentGrid : MonoBehaviour
         if (result == null)
             return;
 
+        if (result.reactionVFX != null)
+            Instantiate(result.reactionVFX, cell.worldPosition, Quaternion.identity);
+
         // Check if result has a terrain layer to paint
         if (result.terrainLayer >= 0)
             PaintCell(cell.gridPosition, result.terrainLayer, removeGrass);

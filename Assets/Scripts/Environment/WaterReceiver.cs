@@ -85,14 +85,16 @@ public class WaterReceiver : MonoBehaviour, IElementReceiver
                 foreach (var waterCell in waterCells)
                 {
                     // Set the new status for all child water cells
-                    waterCell.currentStatus = newResult.newStatus;
+                    waterCell.currentStatus = EnvironmentStatusType.None;
 
                     // Create steam
                     Vector3 spawnPosition = waterCell.worldPosition;
-                    spawnPosition.y = iceVFXInstance.transform.position.y;
-                    Instantiate(newResult.reactionVFX, spawnPosition, Quaternion.identity, this.transform);
+                    spawnPosition.y = transform.position.y;
+                    Instantiate(newResult.reactionVFX, spawnPosition, Quaternion.identity);
                 }
             }
+
+            currentStatus = EnvironmentStatusType.None;
 
             // Destroy the ice VFX if it exists
             if (iceVFXInstance != null)

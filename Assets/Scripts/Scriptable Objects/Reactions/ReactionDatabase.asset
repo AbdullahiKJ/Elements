@@ -26,7 +26,7 @@ MonoBehaviour:
     element: 1
     result:
       newStatus: 0
-      reactionVFX: {fileID: 0}
+      reactionVFX: {fileID: 6716933543107358056, guid: edfc992d1076742cabe4e3e78495244a, type: 3}
       duration: 0
       terrainLayer: -1
   - surfaceType: 0
@@ -42,7 +42,7 @@ MonoBehaviour:
     element: 0
     result:
       newStatus: 0
-      reactionVFX: {fileID: 0}
+      reactionVFX: {fileID: 6716933543107358056, guid: edfc992d1076742cabe4e3e78495244a, type: 3}
       duration: 0
       terrainLayer: 0
   - surfaceType: 0
@@ -66,7 +66,7 @@ MonoBehaviour:
     element: 0
     result:
       newStatus: 0
-      reactionVFX: {fileID: 0}
+      reactionVFX: {fileID: 6716933543107358056, guid: edfc992d1076742cabe4e3e78495244a, type: 3}
       duration: 0
       terrainLayer: 0
   - surfaceType: 1
@@ -90,6 +90,6 @@ MonoBehaviour:
     element: 0
     result:
       newStatus: 3
-      reactionVFX: {fileID: 0}
+      reactionVFX: {fileID: 6716933543107358056, guid: edfc992d1076742cabe4e3e78495244a, type: 3}
       duration: 0
       terrainLayer: -1
