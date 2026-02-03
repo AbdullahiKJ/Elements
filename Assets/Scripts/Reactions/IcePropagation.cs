@@ -19,6 +19,9 @@ public class IcePropagationSystem
         iceCluster.Add(cell);
         cell.currentStatus = EnvironmentStatusType.Frozen;
 
+        // Try freezing characters
+        FreezeCharacter(cell);
+
         // Instantly propagate ice from this cell
         InstantPropagate(cell);
     }
@@ -53,6 +56,9 @@ public class IcePropagationSystem
                 iceCluster.Add(neighbor);
                 visited.Add(neighbor);
 
+                // Try freezing characters on this cell
+                FreezeCharacter(neighbor);
+
                 // Apply visuals
                 ReactionResult newResult = new ReactionResult
                 {
@@ -66,5 +72,13 @@ public class IcePropagationSystem
 
         // Clear the ice cluster
         iceCluster.Clear();
+    }
+
+    void FreezeCharacter(EnvironmentGridCell cell)
+    {
+        foreach (var character in CharacterManager.instance.GetCharactersOnCell(cell, grid.width))
+        {
+            character.Freeze();
+        }
     }
 }

@@ -52,6 +52,9 @@ public class WaterReceiver : MonoBehaviour, IElementReceiver
     public void ReceiveElement(ElementData elementData, Vector3 hitPoint)
     {
         ReactionResult newResult = statusController.ProcessElement(elementData, surfaceType, currentStatus);
+        if (newResult == null)
+            return;
+
         currentStatus = newResult.newStatus;
 
         // Handle special case for freezing

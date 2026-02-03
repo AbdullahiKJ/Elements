@@ -44,7 +44,7 @@ MonoBehaviour:
       newStatus: 0
       reactionVFX: {fileID: 0}
       duration: 0
-      terrainLayer: -1
+      terrainLayer: 0
   - surfaceType: 0
     existingStatus: 0
     element: 1
@@ -52,7 +52,23 @@ MonoBehaviour:
       newStatus: 3
       reactionVFX: {fileID: 0}
       duration: 0
-      terrainLayer: -1
+      terrainLayer: 4
+  - surfaceType: 0
+    existingStatus: 3
+    element: 3
+    result:
+      newStatus: 4
+      reactionVFX: {fileID: 0}
+      duration: 0
+      terrainLayer: 5
+  - surfaceType: 0
+    existingStatus: 4
+    element: 0
+    result:
+      newStatus: 0
+      reactionVFX: {fileID: 0}
+      duration: 0
+      terrainLayer: 0
   - surfaceType: 1
     existingStatus: 0
     element: 1
